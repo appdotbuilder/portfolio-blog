@@ -1,9 +1,30 @@
 
+import { db } from '../db';
+import { blogPostsTable } from '../db/schema';
 import { type GetBlogPostByIdInput, type BlogPost } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export const getBlogPostById = async (input: GetBlogPostByIdInput): Promise<BlogPost | null> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a specific blog post by its ID from the database.
-    // Should query blogPostsTable with the provided ID and return the post or null if not found.
-    return Promise.resolve(null);
+  try {
+    const result = await db.select()
+      .from(blogPostsTable)
+      .where(eq(blogPostsTable.id, input.id))
+      .execute();
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const blogPost = result[0];
+    return {
+      ...blogPost,
+      // Ensure dates are properly coerced
+      created_at: blogPost.created_at,
+      updated_at: blogPost.updated_at,
+      published_at: blogPost.published_at
+    };
+  } catch (error) {
+    console.error('Blog post retrieval failed:', error);
+    throw error;
+  }
 };

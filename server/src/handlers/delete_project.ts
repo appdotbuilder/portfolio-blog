@@ -1,9 +1,20 @@
 
+import { db } from '../db';
+import { projectsTable } from '../db/schema';
 import { type GetProjectByIdInput } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export const deleteProject = async (input: GetProjectByIdInput): Promise<{ success: boolean }> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a project from the database by its ID.
-    // Should delete the project from projectsTable and return success status.
-    return Promise.resolve({ success: false });
+  try {
+    // Delete project by ID
+    const result = await db.delete(projectsTable)
+      .where(eq(projectsTable.id, input.id))
+      .execute();
+
+    // Check if any rows were affected (project existed and was deleted)
+    return { success: (result.rowCount ?? 0) > 0 };
+  } catch (error) {
+    console.error('Project deletion failed:', error);
+    throw error;
+  }
 };

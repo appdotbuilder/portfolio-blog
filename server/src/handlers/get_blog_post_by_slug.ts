@@ -1,9 +1,27 @@
 
+import { db } from '../db';
+import { blogPostsTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
 import { type GetBlogPostBySlugInput, type BlogPost } from '../schema';
 
 export const getBlogPostBySlug = async (input: GetBlogPostBySlugInput): Promise<BlogPost | null> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a specific blog post by its slug from the database.
-    // Should query blogPostsTable with the provided slug and return the post or null if not found.
-    return Promise.resolve(null);
+  try {
+    // Query blog post by slug
+    const results = await db.select()
+      .from(blogPostsTable)
+      .where(eq(blogPostsTable.slug, input.slug))
+      .execute();
+
+    // Return null if no blog post found
+    if (results.length === 0) {
+      return null;
+    }
+
+    // Return the first (and should be only) result
+    const blogPost = results[0];
+    return blogPost;
+  } catch (error) {
+    console.error('Blog post fetch by slug failed:', error);
+    throw error;
+  }
 };
